@@ -1,16 +1,42 @@
-import axios from 'axios'
+import axios from 'axios';
 
-const state = {}
+const state = {
+    todos: []
+};
 
-const getters = {}
+const getters = {
+    allTodos: (state) => state.todos
+};
 
-const actions = {}
+const actions = {
+    async getTodos({ commit }) {
+        const response = await axios.get('https://jsonplaceholder.typicode.com/todos');
+        commit('setTodos', response.data);
+    },
+    async addTodo({ commit }, title) {
+        const response = await axios.post('https://jsonplaceholder.typicode.com/todos', { title, completed: false });
+        commit('addNewTodo', response.data);
+    },
+    async deleteTodo({ commit }, id) {
+        await axios.delete(`https://jsonplaceholder.typicode.com/todos/${id}`);
+        commit('removeTodo', id);
+    },
+    async fiterTodos({commit}, e) {
+        const limit = parseInt(e.target.options[e.target.options.selectedIndex].value);
+        const response = await axios.get(`https://jsonplaceholder.typicode.com/todos?_limit=${limit}`);
+        commit('setTodos', response.data);
+    }
+};
 
-const mutations = {}
+const mutations = {
+    setTodos: (state, todos) => ( state.todos = todos ),
+    addNewTodo: (state, todo) => state.todos.unshift(todo),
+    removeTodo: (state, id) => state.todos = state.todos.filter(todo => todo.id !== id)
+};
 
 export default {
     state,
     getters,
     actions,
     mutations
-}
+};
